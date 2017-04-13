@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+# fail fast
+set -eu
+
+# parse args
+BP_DIR="$(cd "$(dirname "$0")" && pwd)"
+BUILD_DIR=$1
+CACHE_DIR=$2
+OPT_DIR=$BP_DIR/../opt/
+
+fetch_nginx_tarball() {
+    local version="1.9.7"
+    local tarball_file="nginx-$version.tgz"
+    local stack="cedar-14"
+    local nginx_tarball_url="https://s3-external-1.amazonaws.com/heroku-buildpack-ruby/nginx/$stack/nginx-$version-ngx_mruby.tgz"
+    local dest_path="$CACHE_DIR/$stack/$tarball_file"
+
+    if [ -f "$dest_path" ]; then
+        echo -n "cat $dest_path"
+    else
+        echo -n "curl -L $nginx_tarball_url"
+    fi
+}
+
+heroku_bin_dir=$BUILD_DIR/.heroku/bin
+mkdir -p $heroku_bin_dir
+
+nginx_dir=$BUILD_DIR/.nginx
+nginx_bin_dir=$nginx_dir/bin
+mkdir -p $nginx_bin_dir
+
+$(fetch_nginx_tarball) | tar xzC $nginx_bin_dir
+cp $OPT_DIR/web $nginx_dir/bin/nginx-start
+chmod +x $nginx_dir/bin/nginx-start
+echo "-----> Installed nginx"
+
+cp $OPT_DIR/nginx.conf.erb $nginx_dir/

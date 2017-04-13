@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+echo "Nginx"
+exit 0
