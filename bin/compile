@@ -25,7 +25,7 @@ fetch_nginx_tarball() {
 
 gen_nginx_start_script() {
 cat <<EOF
-#!/usr/bin/env bash
+#!/bin/bash
 set -eu
     if [ -f .nginx/bin/nginx-start ]; then
         cd .nginx > /dev/null 2>&1
