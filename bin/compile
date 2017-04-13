@@ -23,21 +23,6 @@ fetch_nginx_tarball() {
     fi
 }
 
-gen_nginx_start_script() {
-cat <<EOF
-#!/bin/bash
-set -eu
-    if [ -f .nginx/bin/nginx-start ]; then
-        cd .nginx > /dev/null 2>&1
-        eval "bin/nginx-start &"
-        cd - > /dev/null 2>&1
-    else
-        echo "No .nginx/bin/nginx-start file found!"
-        exit 1
-    fi
-EOF
-}
-
 heroku_bin_dir=$BUILD_DIR/.heroku/bin
 mkdir -p $heroku_bin_dir
 
@@ -49,7 +34,19 @@ $(fetch_nginx_tarball) | tar xzC $nginx_bin_dir
 cp $OPT_DIR/web $nginx_dir/bin/nginx-start
 chmod +x $nginx_dir/bin/nginx-start
 
-$(gen_nginx_start_script) > ${BUILD_DIR}/nginx-start.sh
+cat <<EOF > ${BUILD_DIR}/nginx-start.sh
+#!/bin/bash
+set -eu
+    if [ -f .nginx/bin/nginx-start ]; then
+        cd .nginx > /dev/null 2>&1
+        eval "bin/nginx-start &"
+        cd - > /dev/null 2>&1
+    else
+        echo "No .nginx/bin/nginx-start file found!"
+        exit 1
+    fi
+EOF
+
 chmod +x ${BUILD_DIR}/nginx-start.sh
 
 echo "-----> Installed nginx"
